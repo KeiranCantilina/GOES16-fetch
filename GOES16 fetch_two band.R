@@ -11,6 +11,21 @@ black_rectangle <- image_read("C://Users//canti021//Documents//black_rectangle.p
 white_rectangle <- image_read("C://Users//canti021//Documents//white_rectangle.png")
 black_stripe <- image_read("C://Users//canti021//Documents//black_stripe.png")
 
+## Check for valid internet
+if (url.exists("www.google.com")==TRUE) {
+  out <- TRUE
+} else {
+  out <- FALSE
+}
+
+if(out==FALSE){
+  quit()
+}
+
+## Retrieve list of timestamps (for geocolor)
+stamps<-import("http://rammb-slider.cira.colostate.edu/data/json/goes-16/full_disk/geocolor/latest_times.json")
+time_code <- as.character(stamps$timestamps_int[1])
+
 ## Init vectors
 a <- vector(mode = "list", length = 8)
 b <- vector(mode = "list", length = 8)
@@ -28,141 +43,13 @@ image_list <- list(a,b,c,d,e,f,g,h)
 destfile <- "C://Users//canti021//Documents//GOES16//total.png"
 destfile2 <- "C://Users//canti021//Documents//GOES16//total2.png"
 
-#Time calculations
-time_now <- as.POSIXlt(Sys.time(), tz = "gmt")
-year <- substr(time_now, 1,4)
-month <- substr(time_now, 6,7)
-day <- substr(time_now, 9,10)
-hour <- substr(time_now, 12,13)
-minute <- substr(time_now, 15,16)
-second <- 0
-pic_hour <- hour
-
-## Boundary conditions (new year, month, leap years, etc) and URL directory formatting based on date
-if(minute <= 15){
-  pic_minute <- "00"
-  pic_hour <- sprintf("%02d",as.numeric(hour)-1)
-  if(pic_hour == -1){
-    pic_hour <- 23
-    day <- sprintf("%02d",as.numeric(day)-1)
-    if(day=="00"){
-      month <- sprintf("%02d",as.numeric(month)-1)
-      day <- 31
-      if(month == "00"){
-        month <- "12"
-        year <- as.numeric(year)-1
-      }
-      if(month == "04"|month=="06"|month=="09"|month=="11"){
-        day <- "30"
-      }
-      if(month == "02"){
-        day <- "28"
-        ## Leap year detection
-        if(year %% 4 == 0){
-          day <- "29"
-        }
-      }
-    }
-  }
-}
-
-if(minute <= 30 & minute > 15){
-  pic_minute <- "15"
-  pic_hour <- sprintf("%02d",as.numeric(hour)-1)
-  if(pic_hour == -1){
-    pic_hour <- 23
-    day <- sprintf("%02d",as.numeric(day)-1)
-    if(day=="00"){
-      month <- sprintf("%02d",as.numeric(month)-1)
-      day <- 31
-      if(month == "00"){
-        month <- "12"
-        year <- as.numeric(year)-1
-      }
-      if(month == "04"|month=="06"|month=="09"|month=="11"){
-        day <- "30"
-      }
-      if(month == "02"){
-        day <- "28"
-        if(year %% 4 == 0){
-          day <- "29"
-        }
-      }
-    }
-  }
-}
-
-if(minute <= 45 & minute > 30){
-  pic_minute <- "30"
-  pic_hour <- sprintf("%02d",as.numeric(hour)-1)
-  if(pic_hour == -1){
-    pic_hour <- 23
-    day <- sprintf("%02d",as.numeric(day)-1)
-    if(day=="00"){
-      month <- sprintf("%02d",as.numeric(month)-1)
-      day <- 31
-      if(month == "00"){
-        month <- "12"
-        year <- as.numeric(year)-1
-      }
-      if(month == "04"|month=="06"|month=="09"|month=="11"){
-        day <- "30"
-      }
-      if(month == "02"){
-        day <- "28"
-        if(year %% 4 == 0){
-          day <- "29"
-        }
-      }
-    }
-  }
-}
-
-if(minute <= 59 & minute > 45){
-  pic_minute <- "45"
-  pic_hour <- sprintf("%02d",as.numeric(hour)-1)
-  if(pic_hour == -1){
-    pic_hour <- 23
-    day <- sprintf("%02d",as.numeric(day)-1)
-    if(day=="00"){
-      month <- sprintf("%02d",as.numeric(month)-1)
-      day <- 31
-      if(month == "00"){
-        month <- "12"
-        year <- as.numeric(year)-1
-      }
-      if(month == "04"|month=="06"|month=="09"|month=="11"){
-        day <- "30"
-      }
-      if(month == "02"){
-        day <- "28"
-        if(year %% 4 == 0){
-          day <- "29"
-        }
-      }
-    }
-  }
-}
-
-
-clump1 <- paste(year, month, day, sep = "")
-
-## Brute force last two digits of image ID
-for(second_test in 30:46){
-  clump2 <- paste(clump1, pic_hour, pic_minute, second_test, sep="")
-  base_url <- paste("http://rammb-slider.cira.colostate.edu/data/imagery/",clump1,"/goes-16---full_disk/geocolor/",clump2,"/01/",sep="")
-  if(url.exists(paste(base_url, "000_000.png",sep="")) == TRUE){
-    second <- second_test
-  }
-}
-
-
+## URL includes most recent timestamped image data (credit to Paul Schuster for assistance)
+clump1 <- substr(time_code, 1,8)
+clump2<- time_code
 
 
 
 ## Image tile fetch 2x2 - Geocolor
-
-clump2 <- paste(clump1, pic_hour, pic_minute, second, sep="")
 
 base_url <- paste("http://rammb-slider.cira.colostate.edu/data/imagery/",clump1,"/goes-16---full_disk/geocolor/",clump2,"/01/",sep="")
 
